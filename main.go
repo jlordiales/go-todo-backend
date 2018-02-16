@@ -10,7 +10,8 @@ import (
 
 func SetupRoutes() *gin.Engine {
 	router := gin.Default()
-	router.Use(cors.Default())
+
+	configureCors(router)
 	gin.DisableConsoleColor()
 
 	router.GET("/ping", handlers.Ping)
@@ -22,9 +23,14 @@ func SetupRoutes() *gin.Engine {
 	return router
 }
 
+func configureCors(router *gin.Engine) {
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AddAllowMethods("DELETE")
+	router.Use(cors.New(corsConfig))
+}
+
 func port() string {
 	port := os.Getenv("PORT")
-
 	if port == "" {
 		return ":8080"
 	}
