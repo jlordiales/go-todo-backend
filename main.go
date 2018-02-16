@@ -26,7 +26,7 @@ func SetupRoutes() *gin.Engine {
 func configureCors(router *gin.Engine) {
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = true
-	corsConfig.AddAllowMethods("DELETE")
+	corsConfig.AddAllowMethods("DELETE", "PATCH")
 	router.Use(cors.New(corsConfig))
 }
 
