@@ -63,6 +63,17 @@ func Test_shouldBePossibleToGetATodoByItsUrl(t *testing.T) {
 	assert.Equal(t, "a todo", todo.Title)
 }
 
+func Test_canUpdateTodoByPatchingToItsUrl(t *testing.T) {
+	testRouter := routes()
+	_, createdTodo := createTodo(`{"title": "a todo"}`, testRouter)
+
+	resp, todo := patchTodo(`{"title": "a new title", "completed": true}`, createdTodo.Id, testRouter)
+
+	assert.Equal(t, 200, resp.Code)
+	assert.Equal(t, "a new title", todo.Title)
+	assert.True(t, todo.Completed)
+}
+
 func deleteAll(testRouter *gin.Engine) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("DELETE", "/", nil)
 	return performRequest(testRouter, req)
@@ -82,6 +93,15 @@ func performRequest(r http.Handler, req *http.Request) *httptest.ResponseRecorde
 
 func createTodo(todoJson string, engine *gin.Engine) (*httptest.ResponseRecorder, handlers.Todo) {
 	req, _ := http.NewRequest("POST", "/", bytes.NewBuffer([]byte(todoJson)))
+	resp := performRequest(engine, req)
+
+	var createdTodo handlers.Todo
+	json.Unmarshal(resp.Body.Bytes(), &createdTodo)
+	return resp, createdTodo
+}
+
+func patchTodo(todoJson string, id string, engine *gin.Engine) (*httptest.ResponseRecorder, handlers.Todo) {
+	req, _ := http.NewRequest("PATCH", "/" + id, bytes.NewBuffer([]byte(todoJson)))
 	resp := performRequest(engine, req)
 
 	var createdTodo handlers.Todo

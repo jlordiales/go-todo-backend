@@ -24,7 +24,9 @@ func setupRoutes(todos *handlers.Todos) *gin.Engine {
 	router.GET("/", listTodos(todos))
 
 	router.POST("/", addTodo(todos))
+	router.PATCH("/:id", updateTodo(todos))
 	router.DELETE("/", deleteAllTodos(todos))
+	router.DELETE("/:id", deleteTodo(todos))
 
 	return router
 }
@@ -56,7 +58,22 @@ func addTodo(todos *handlers.Todos) func(context *gin.Context) {
 			context.AbortWithError(400, e)
 		}
 	}
+}
 
+func updateTodo(todos *handlers.Todos) func(context *gin.Context) {
+	return func(context *gin.Context) {
+		var todo handlers.Todo
+		if t := todos.Find(context.Param("id")); t != nil {
+			if e := context.BindJSON(&todo); e == nil {
+				t.Update(todo)
+				context.JSON(200, t)
+			} else {
+				context.AbortWithError(400, e)
+			}
+		} else {
+			context.Status(404)
+		}
+	}
 }
 
 func deleteAllTodos(todos *handlers.Todos) func(context *gin.Context) {
@@ -64,7 +81,13 @@ func deleteAllTodos(todos *handlers.Todos) func(context *gin.Context) {
 		todos.RemoveAll()
 		context.Status(200)
 	}
+}
 
+func deleteTodo(todos *handlers.Todos) func(context *gin.Context) {
+	return func(context *gin.Context) {
+		todos.RemoveAll()
+		context.Status(200)
+	}
 }
 
 func basePath() string {

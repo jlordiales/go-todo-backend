@@ -16,7 +16,7 @@ type Todo struct {
 type Todos map[string]*Todo
 
 func (t Todos) List() []*Todo{
-	var todos []*Todo
+	var todos = make([]*Todo, 0)
 	for _,v := range t {
 		todos = append(todos, v)
 	}
@@ -43,4 +43,14 @@ func (t Todos) RemoveAll() {
 	for k := range t {
 		delete(t, k)
 	}
+}
+
+func (t Todos) Remove(id string) {
+	delete(t, id)
+}
+
+func (todo *Todo) Update(newTodo Todo) *Todo {
+	todo.Title = newTodo.Title
+	todo.Completed = newTodo.Completed
+	return todo
 }
