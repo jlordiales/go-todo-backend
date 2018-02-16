@@ -25,11 +25,7 @@ func (t Todos) List() []*Todo {
 }
 
 func (todos Todos) Find(id string) *Todo {
-	t, ok := todos[id]
-	if ok {
-		return t
-	}
-	return nil
+	return todos[id]
 }
 
 func (t Todos) Add(todo Todo, basePath string) *Todo {
