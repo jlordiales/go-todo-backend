@@ -53,5 +53,6 @@ func (t Todos) Remove(id string) {
 func (todo *Todo) Update(newTodo Todo) *Todo {
 	todo.Title = newTodo.Title
 	todo.Completed = newTodo.Completed
+	todo.Order = newTodo.Order
 	return todo
 }

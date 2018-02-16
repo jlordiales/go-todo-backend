@@ -16,12 +16,6 @@
 			"revisionTime": "2017-09-17T02:20:32Z"
 		},
 		{
-			"checksumSHA1": "ordsbOJ6Etv7opIkUCCwhSBB8qs=",
-			"path": "github.com/gin-contrib/location",
-			"revision": "5220ebf8be6c350431168cbd884f2c0ace0e3f4c",
-			"revisionTime": "2017-09-17T02:18:33Z"
-		},
-		{
 			"checksumSHA1": "Cmfv2KnhEhnmmdn0gZDDTH3BZxM=",
 			"path": "github.com/gin-contrib/sse",
 			"revision": "22d885f9ecc78bf4ee5d72b937e4bbcdc58e8cae",
