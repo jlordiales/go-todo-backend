@@ -7,6 +7,8 @@ import (
 	"bytes"
 	"github.com/stretchr/testify/assert"
 	"github.com/gin-gonic/gin"
+	"todo-backend/handlers"
+	"encoding/json"
 )
 
 func Test_rootPathShouldRespondWith200(t *testing.T) {
@@ -20,60 +22,45 @@ func Test_rootPathShouldRespondWith200(t *testing.T) {
 
 func Test_rootPathShouldAcceptPostWithNewTodo(t *testing.T) {
 	testRouter := routes()
-	json := `{"title": "a todo"}`
-	req, _ := http.NewRequest("POST", "/", bytes.NewBuffer([]byte(json)))
 
-	resp := performRequest(testRouter, req)
+	resp, createdTodo := createTodo(`{"title": "a todo"}`, testRouter)
 
-	assert.Equal(t, 200, resp.Code)
+	assert.Equal(t, 201, resp.Code)
+	assert.NotEmpty(t, createdTodo.Url)
+	assert.Equal(t, "a todo", createdTodo.Title)
+	assert.False(t, createdTodo.Completed)
 }
 
 func Test_getAfterPostReturnsAllTodos(t *testing.T) {
 	testRouter := routes()
-	json := `{"title": "a todo"}`
-	deleteAll(testRouter)
-	addTodo(json, testRouter)
+	createTodo(`{"title": "a todo"}`, testRouter)
+	createTodo(`{"title": "another todo"}`, testRouter)
 
-	listRequest, _ := http.NewRequest("GET", "/", nil)
-	resp := performRequest(testRouter, listRequest)
+	resp, todos := getAllTodos(testRouter)
 
 	assert.Equal(t, 200, resp.Code)
+	assert.Len(t, todos, 2)
 }
 
 func Test_deleteShouldRemoveAllTodos(t *testing.T) {
 	testRouter := routes()
-	json := `{"title": "a todo"}`
-	addTodo(json, testRouter)
+	createTodo(`{"title": "a todo"}`, testRouter)
 
 	resp := deleteAll(testRouter)
-
 	assert.Equal(t, 200, resp.Code)
 
-	listRequest, _ := http.NewRequest("GET", "/", nil)
-	listResponse := performRequest(testRouter, listRequest)
-	assert.JSONEq(t, "[]", listResponse.Body.String())
+	_, todos := getAllTodos(testRouter)
+	assert.Len(t, todos, 0)
 }
 
-func Test_newTodosShouldBeCreatedAsNotCompleted(t *testing.T) {
+func Test_shouldBePossibleToGetATodoByItsUrl(t *testing.T) {
 	testRouter := routes()
-	json := `{"title": "a todo"}`
-	req, _ := http.NewRequest("POST", "/", bytes.NewBuffer([]byte(json)))
+	_, createdTodo := createTodo(`{"title": "a todo"}`, testRouter)
 
-	resp := performRequest(testRouter, req)
+	resp, todo := getTodo(testRouter, "/" + createdTodo.Id)
 
 	assert.Equal(t, 200, resp.Code)
-	assert.Contains(t, resp.Body.String(),`"completed":false`)
-}
-
-func Test_newTodosShouldHaveAnUrl(t *testing.T) {
-	testRouter := routes()
-	json := `{"title": "a todo"}`
-	req, _ := http.NewRequest("POST", "/", bytes.NewBuffer([]byte(json)))
-
-	resp := performRequest(testRouter, req)
-
-	assert.Equal(t, 200, resp.Code)
-	assert.Contains(t, resp.Body.String(),`"url":`)
+	assert.Equal(t, "a todo", todo.Title)
 }
 
 func deleteAll(testRouter *gin.Engine) *httptest.ResponseRecorder {
@@ -83,16 +70,39 @@ func deleteAll(testRouter *gin.Engine) *httptest.ResponseRecorder {
 
 func routes() *gin.Engine {
 	gin.SetMode(gin.TestMode)
-	return SetupRoutes()
-}
-
-func addTodo(json string, testRouter *gin.Engine)  {
-	createTodoReq, _ := http.NewRequest("POST", "/", bytes.NewBuffer([]byte(json)))
-	performRequest(testRouter, createTodoReq)
+	todos := handlers.Todos{}
+	return setupRoutes(&todos)
 }
 
 func performRequest(r http.Handler, req *http.Request) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	return w
+}
+
+func createTodo(todoJson string, engine *gin.Engine) (*httptest.ResponseRecorder, handlers.Todo) {
+	req, _ := http.NewRequest("POST", "/", bytes.NewBuffer([]byte(todoJson)))
+	resp := performRequest(engine, req)
+
+	var createdTodo handlers.Todo
+	json.Unmarshal(resp.Body.Bytes(), &createdTodo)
+	return resp, createdTodo
+}
+
+func getAllTodos(engine *gin.Engine) (*httptest.ResponseRecorder, []handlers.Todo) {
+	listRequest, _ := http.NewRequest("GET", "/", nil)
+	resp := performRequest(engine, listRequest)
+
+	var allTodos []handlers.Todo
+	json.Unmarshal(resp.Body.Bytes(), &allTodos)
+	return resp, allTodos
+}
+
+func getTodo(engine *gin.Engine, id string) (*httptest.ResponseRecorder, handlers.Todo) {
+	listRequest, _ := http.NewRequest("GET", id, nil)
+	resp := performRequest(engine, listRequest)
+
+	var todo handlers.Todo
+	json.Unmarshal(resp.Body.Bytes(), &todo)
+	return resp, todo
 }
