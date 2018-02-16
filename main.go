@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/location"
 	"todo-backend/handlers"
 	"os"
 )
@@ -12,9 +13,11 @@ func SetupRoutes() *gin.Engine {
 	router := gin.Default()
 
 	configureCors(router)
+	router.Use(location.Default())
 	gin.DisableConsoleColor()
 
-	router.GET("/ping", handlers.Ping)
+	router.GET("/:id", handlers.ReadTodo)
+	//router.GET("/ping", handlers.Ping)
 	router.GET("/", handlers.ListTodos)
 
 	router.POST("/", handlers.AddTodo)

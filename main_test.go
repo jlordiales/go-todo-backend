@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"bytes"
 	"github.com/stretchr/testify/assert"
-	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,7 +26,6 @@ func Test_rootPathShouldAcceptPostWithNewTodo(t *testing.T) {
 	resp := performRequest(testRouter, req)
 
 	assert.Equal(t, 200, resp.Code)
-	assert.JSONEq(t, json, resp.Body.String())
 }
 
 func Test_getAfterPostReturnsAllTodos(t *testing.T) {
@@ -40,7 +38,6 @@ func Test_getAfterPostReturnsAllTodos(t *testing.T) {
 	resp := performRequest(testRouter, listRequest)
 
 	assert.Equal(t, 200, resp.Code)
-	assert.JSONEq(t, fmt.Sprintf("[%s]", json), resp.Body.String())
 }
 
 func Test_deleteShouldRemoveAllTodos(t *testing.T) {
@@ -55,6 +52,28 @@ func Test_deleteShouldRemoveAllTodos(t *testing.T) {
 	listRequest, _ := http.NewRequest("GET", "/", nil)
 	listResponse := performRequest(testRouter, listRequest)
 	assert.JSONEq(t, "[]", listResponse.Body.String())
+}
+
+func Test_newTodosShouldBeCreatedAsNotCompleted(t *testing.T) {
+	testRouter := routes()
+	json := `{"title": "a todo"}`
+	req, _ := http.NewRequest("POST", "/", bytes.NewBuffer([]byte(json)))
+
+	resp := performRequest(testRouter, req)
+
+	assert.Equal(t, 200, resp.Code)
+	assert.Contains(t, resp.Body.String(),`"completed":false`)
+}
+
+func Test_newTodosShouldHaveAnUrl(t *testing.T) {
+	testRouter := routes()
+	json := `{"title": "a todo"}`
+	req, _ := http.NewRequest("POST", "/", bytes.NewBuffer([]byte(json)))
+
+	resp := performRequest(testRouter, req)
+
+	assert.Equal(t, 200, resp.Code)
+	assert.Contains(t, resp.Body.String(),`"url":`)
 }
 
 func deleteAll(testRouter *gin.Engine) *httptest.ResponseRecorder {
