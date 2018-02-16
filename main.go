@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"todo-backend/handlers"
+	"os"
 )
 
 
@@ -19,8 +20,17 @@ func SetupRoutes() *gin.Engine {
 	return router
 }
 
+func port() string {
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		return ":8080"
+	}
+	return ":" + port
+}
+
 func main() {
-	SetupRoutes().Run(":8080")
+	SetupRoutes().Run(port())
 }
 
 
