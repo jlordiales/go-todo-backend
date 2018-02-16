@@ -11,13 +11,14 @@ type Todo struct {
 	Title     string `json:"title"`
 	Completed bool   `json:"completed"`
 	Url       string `json:"url,omitempty"`
+	Order     int    `json:"order,omitempty"`
 }
 
 type Todos map[string]*Todo
 
-func (t Todos) List() []*Todo{
+func (t Todos) List() []*Todo {
 	var todos = make([]*Todo, 0)
-	for _,v := range t {
+	for _, v := range t {
 		todos = append(todos, v)
 	}
 	return todos
@@ -31,7 +32,7 @@ func (todos Todos) Find(id string) *Todo {
 	return nil
 }
 
-func (t Todos) Add(todo Todo, basePath string) *Todo{
+func (t Todos) Add(todo Todo, basePath string) *Todo {
 	todo.Completed = false
 	todo.Id = uuid.Must(uuid.NewV4()).String()
 	todo.Url = basePath + "/" + todo.Id
