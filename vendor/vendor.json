@@ -119,6 +119,12 @@
 			"revisionTime": "2018-02-02T15:35:43Z"
 		},
 		{
+			"checksumSHA1": "QSFMbrLU8g5wr7UviJ0IwjQy/ds=",
+			"path": "github.com/satori/go.uuid",
+			"revision": "36e9d2ebbde5e3f13ab2e25625fd453271d6522e",
+			"revisionTime": "2018-01-03T17:44:51Z"
+		},
+		{
 			"checksumSHA1": "7HRJhmE8tPVux9Bk0A+gTn5h7vY=",
 			"path": "github.com/stretchr/testify/assert",
 			"revision": "be8372ae8ec5c6daaed3cc28ebf73c54b737c240",
